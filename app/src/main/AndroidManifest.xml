@@ -1,11 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
  <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+ <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
  <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
  <uses-feature android:name="android.software.live_wallpaper" android:required="false"/>
  <application android:label="PocketPals Island" android:icon="@drawable/icon" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:allowBackup="true" android:supportsRtl="true">
   <activity android:name=".MainActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
+  <service android:name=".RainService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>
   <service android:name=".IslandService" android:exported="false" android:foregroundServiceType="specialUse"><property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User-enabled animated companion overlay, with persistent stop control"/></service>
   <service android:name=".PalWallpaper" android:label="PocketPals Meadow" android:permission="android.permission.BIND_WALLPAPER" android:exported="true"><intent-filter><action android:name="android.service.wallpaper.WallpaperService"/></intent-filter><meta-data android:name="android.service.wallpaper" android:resource="@xml/wallpaper"/></service>
  </application>

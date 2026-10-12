@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  actions: read
 concurrency:
   group: apk-${{ github.ref }}
   cancel-in-progress: true
@@ -12,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      POCKETPALS_KEYSTORE: ${{ runner.temp }}/pocketpals-signing/debug.keystore
+      POCKETPALS_KEYSTORE: ${{ github.workspace }}/.ci-signing/debug.keystore
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -46,25 +47,49 @@ jobs:
       - name: Verify signing key exists
         run: test -s "$POCKETPALS_KEYSTORE"
       - run: gradle assembleDebug --no-daemon
-      - name: Verify APK signature and record public fingerprint
+      - name: Read built version and verify signature
+        id: meta
         run: |
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/debug/app-debug.apk
+          python3 - <<'PY'
+          import json, os, shutil
+          from pathlib import Path
+          metadata = json.loads(Path("app/build/outputs/apk/debug/output-metadata.json").read_text())
+          element = metadata["elements"][0]
+          version = element["versionName"]
+          filename = f"PocketPals-Island-{version}.apk"
+          shutil.copyfile(Path("app/build/outputs/apk/debug") / element["outputFile"], filename)
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"version={version}\napk={filename}\n")
+          PY
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "${{ steps.meta.outputs.apk }}"
           keytool -exportcert -keystore "$POCKETPALS_KEYSTORE" -storepass android -alias androiddebugkey -file signing-certificate.der
           sha256sum signing-certificate.der > signing-certificate.sha256
-          cp app/build/outputs/apk/debug/app-debug.apk PocketPals-Island-1.1.1.apk
-      - run: cp app/build/outputs/apk/debug/app-debug.apk PocketPals-Island.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: PocketPals-Island-APK
-          path: PocketPals-Island.apk
+          name: PocketPals-Island-${{ steps.meta.outputs.version }}
+          path: ${{ steps.meta.outputs.apk }}
+      - name: Preserve original releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view v1.0.0 >/dev/null 2>&1; then
+            gh run download 38269482499 -n PocketPals-Island-APK -D old-v1.0.0
+            mv old-v1.0.0/PocketPals-Island.apk old-v1.0.0/PocketPals-Island-1.0.0.apk
+            gh release create v1.0.0 old-v1.0.0/PocketPals-Island-1.0.0.apk --target 71a7bfe2a9ccdc6991dae031ff8efbe123775de3 --title "PocketPals Island v1.0.0" --notes "Original test build, archived unchanged. Uses an old signing certificate; do not install over newer versions." --prerelease --latest=false
+          fi
+          if ! gh release view v1.1.0 >/dev/null 2>&1; then
+            gh run download 38271950945 -n PocketPals-Island-APK -D old-v1.1.0
+            mv old-v1.1.0/PocketPals-Island.apk old-v1.1.0/PocketPals-Island-1.1.0.apk
+            gh release create v1.1.0 old-v1.1.0/PocketPals-Island-1.1.0.apk --target 68c127c91c1c52b90ddf614e3917efaa655b831b --title "PocketPals Island v1.1.0" --notes "Artwork and native media test build, archived unchanged. This version has the old signing-key persistence problem. Prefer v1.1.1 or newer." --prerelease --latest=false
+          fi
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: PocketPals Island 1.1.1 — installation signing fix
-          body: Version 1.1.1 fixes signing-key persistence. Older 1.0 and 1.1 installs use a different certificate and need a one-time uninstall before installation; this resets saved pet data. Future builds must retain this key. Includes native rain media, native permission checking, improved pets, and floating mode. Device compatibility still requires testing.
+          tag_name: v${{ steps.meta.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: PocketPals Island v${{ steps.meta.outputs.version }}
+          body: Versioned test APK. v1.1.1 fixes the signing-key path and retention. Uninstall v1.0 or v1.1 once before installing v1.1.1; saved pet data resets. Later builds must retain this signing key. Native Hyper Island appearance still needs device testing.
           prerelease: true
           files: |
-            PocketPals-Island.apk
-            PocketPals-Island-1.1.1.apk
+            ${{ steps.meta.outputs.apk }}
             signing-certificate.sha256
           make_latest: false

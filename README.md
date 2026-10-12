@@ -1,10 +1,10 @@
-# PocketPals Island — 1.1.0
+# PocketPals Island — 1.1.1
 
 An offline Android companion with six original illustrated pets, three animated scenes, pet-care reactions, and live wallpaper.
 
 ## Install
-Download **PocketPals-Island.apk** from [the GitHub release](https://github.com/dmlazid/pocketpals-island/releases/tag/latest).
-Install over the previous version to retain hearts and pet selection. Android 8 or newer.
+Download **PocketPals-Island-1.1.1.apk** from [release v1.1.1](https://github.com/dmlazid/pocketpals-island/releases/tag/v1.1.1).
+Android 8 or newer. Older 1.0/1.1 builds used different signing keys: uninstall once before installing 1.1.1 (saved pet data resets). Each version has its own release and APK filename; previous releases remain available.
 
 ## Three clearly separated modes
 
@@ -26,7 +26,7 @@ JDK 17, Gradle 8.9, Android SDK 35:
 gradle assembleDebug
 ```
 GitHub Actions publishes the installable test APK to Releases.
-CI caches the test signing key. Before public distribution configure permanent release signing; cache expiration can break update compatibility.
+CI uses an explicit signing-key path and caches the key before building. After initialization, the workflow must fail if the key is missing rather than silently create a replacement. Before public distribution, configure a durable private signing-key backup or repository secret; Actions cache alone is not permanent storage.
 
 ## Native implementation references
 - [Xiaomi island client payload and capability checks](https://dev.mi.com/xiaomihyperos/documentation/detail?pId=2131)

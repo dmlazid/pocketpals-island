@@ -25,4 +25,4 @@ gradle assembleDebug
 The workflow builds and publishes a test APK on pushes to main/master, or via Run workflow. It caches the test signing key to retain update compatibility while that cache exists. Before public distribution, configure a permanent release signing key: the CI test key cache can expire, requiring uninstall/reinstall.
 
 ## Validation status
-Source and manifest reviewed. Actual Android compilation and on-device verification are required; the GitHub Actions result is the build authority. Initial version is a test build, not a verified production release.
+Android APK compilation succeeded in GitHub Actions run 38269482499, and the APK was published to the latest release. On-device installation, overlay behavior, and wallpaper appearance have not yet been verified. Initial version is a test build, not a verified production release.

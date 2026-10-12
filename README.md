@@ -36,5 +36,5 @@ No fake media playback, package impersonation, notification interception, or per
 The app requests neither internet nor microphone permission.
 
 ## Validation
-The first 1.1 artwork/native-check build compiled successfully in Actions run 38271776118. The final build with optional rain playback is tracked in Actions run 38271950945.
+The first 1.1 artwork/native-check build compiled successfully in Actions run 38271776118. The final build with optional rain playback compiled and published successfully in Actions run 38271950945.
 On-device native appearance and installation have not yet been verified on the user's POCO. A successful APK build does not establish Hyper Island compatibility.

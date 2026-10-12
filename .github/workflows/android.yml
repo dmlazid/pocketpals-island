@@ -38,8 +38,8 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          name: PocketPals Island — latest test APK
-          body: Download PocketPals-Island.apk below. Test build; Android 8 or newer. Enable display-over-other-apps permission for the floating island.
+          name: PocketPals Island 1.1.0 — artwork and native access check
+          body: Download PocketPals-Island.apk below. Version 1.1.0 adds illustrated pets, new scenes, a smaller floating pet, and Xiaomi native-island access checking. Native mode requires permission granted by HyperOS; it is not guaranteed and does not bypass system restrictions. Floating mode is separate. On-device testing is still required.
           prerelease: true
           files: PocketPals-Island.apk
           make_latest: false
